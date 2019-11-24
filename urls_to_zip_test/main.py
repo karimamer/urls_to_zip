@@ -1,49 +1,54 @@
-import json
-import zipfile
-import io
 import asyncio
+import io
+import zipfile
+
 import aiohttp
-from aiohttp import web
 import aiohttp_cors
-import requests
-from aiohttp.web import middleware
-from aiojobs.aiohttp import setup, spawn
-import aiojobs
+from aiohttp import web
 
 
+async def health_check(_request):
+    return web.Response(text="service is up and running")
 
-async def health_check(request):
-    return web.Response(text="servie is up and running")
 
-async def aysnc_coro(lst):
-    for data in lst:
-        gif = requests.get(data["url"]).content
-        gif_stream = io.BytesIO(gif)
-        memory_file = io.BytesIO()
-        with zipfile.ZipFile(memory_file, "a", zipfile.ZIP_DEFLATED, False,compresslevel=1) as zf:
-            zf.writestr(data["filename"], gif_stream.getvalue())
-    return memory_file
+async def fetch_compress(session: aiohttp.ClientSession, zf: zipfile.ZipFile, resp ,buffer , url: str, name: str):
+    # the code here is not thread safe. I hacked away around passing the buffer around in single thread becouse
+    # python zipfile lib is not asyncio compatabilbe
+    async with session.get(url) as response:
+        zf.writestr(name, await response.read())
+        # copy buffer into response
+        await resp.write(buffer.getvalue())
+        # flush buffer
+        buffer.truncate(0)
+       
 
-@aiojobs.aiohttp.atomic
 async def archive_img(request):
     data = await request.json()
-    memory_file = await aysnc_coro(data)
+    assert isinstance(data, list)
+
+    # Initialize stream response 
     resp = web.StreamResponse()
-    resp.headers['Content-Type'] = "application/zip"
+    resp.content_type = "application/zip"
     await resp.prepare(request)
-    await resp.write(memory_file.getvalue())
+
+    # Initialize buffer
+    outfile = io.BytesIO()
+    async with aiohttp.ClientSession() as session:
+        with zipfile.ZipFile(outfile, "w") as zf:
+            await asyncio.gather(*(fetch_compress(session, zf,resp ,outfile ,item["url"], item["filename"]) for item in data))
+
+    await resp.write_eof()
     return resp
 
 routes_list = [
     web.get("/health-check", health_check),
-    web.get("/archive", archive_img),
+    web.post("/archive", archive_img),
 
 ]
 
 
 app = web.Application()
 app.add_routes(routes_list)
-
 
 # Configure default CORS settings.
 cors = aiohttp_cors.setup(
@@ -58,5 +63,4 @@ cors = aiohttp_cors.setup(
 # Configure CORS on all routes.
 for route in list(app.router.routes()):
     cors.add(route)
-setup(app, limit=1000)
 web.run_app(app)

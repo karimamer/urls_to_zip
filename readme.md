@@ -1,26 +1,6 @@
  URLs-to-ZIP Archive web service
 ================
 URLs-to-ZIP Archive web service.
-Stack of choice
-
-    Programming Language Python 3.7  
-    aiohttp
-
-Decision making
-Programming Language:
-
-I choose python over other Languages Due to
-
-    familiarity
-    fast iteration
-    Mature web echo system
-
-I choose aiohttp
-
-    aysnc first
-    can scale easily to a million user https://pawelmhm.github.io/asyncio/python/aiohttp/2016/04/22/asyncio-aiohttp.html
-    lightweight
-    easy to use and iterate on
 
 Structure
 ```

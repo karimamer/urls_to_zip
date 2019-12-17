@@ -1,24 +1,5 @@
-Coding Challenge: URLs-to-ZIP Archive web service.
+ URLs-to-ZIP Archive web service
 ================
-
-Code up a simple http microservice that loads a JSON data structure like the 
-one found below and responds with a .zip file whose contents are each of 
-the source `url` named as `filename` within the final .zip archive.
-
-Your service should expose a URL and respond with data as soon as possible
-rather than make the user wait for the entire ZIP to be created first.
-
-Please include instructions on how someone else can run/test your service
-in their own webserver or development environment.
-
-Example data:
-
-To test with heavier load, 
-try running your service against the included `sample_archive.json` file.
-
-Use any language / libraries you like. If it's a framework that might not be obvious to newcomers, a bit of documentation would be nice for the reviewer.
-
----
 URLs-to-ZIP Archive web service.
 Stack of choice
 
@@ -42,7 +23,7 @@ I choose aiohttp
     easy to use and iterate on
 
 Structure
-
+```
 (level one)
 urls_to_zip_test ---|  (level two A)
 |                   |-> urls_to_zip_test -|(level three)
@@ -62,6 +43,7 @@ urls_to_zip_test ---|  (level two A)
 |-> poetry.lock
 |-> pyproject.toml
 |-> sample_archive.json
+````
 
 Folder structure
 urls_to_zip_test
@@ -100,11 +82,11 @@ Installation
 Code Documentation
 
 main
-
+```
  contains web views
                     | -> health_check -> to check if the service is running 
                     | -> archive_img -> get on value for a givien key
-
+```
 URLS
 Create key value pair
 

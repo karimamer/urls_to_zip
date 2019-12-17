@@ -72,11 +72,9 @@ Create key value pair
 
 POST http://127.0.0.1:800/archive_img Body ex -> {"filenmae":"code", "url":"test}
 
+
 How to run ?
 ==================
 
 cd url_to_zip_test
 python main.py
-
-Things I could have done better
-  use a language with better threading and streaming support
